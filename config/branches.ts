@@ -42,7 +42,7 @@ const pretoria: Branch = {
 export const BRANCHES_BY_INBOX: Record<number, Branch> = {
   // "Bot Test" inbox: behaves like Durban while you test.
   // Change to johannesburg or pretoria to test the other branches.
-  111111: durban,
+  157844: durban,
 
   // Live WhatsApp inboxes: leave commented out until go-live day.
   // 222222: durban,       // Sunrose Durban (073 400 4991)
