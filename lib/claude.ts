@@ -34,9 +34,10 @@ export async function decide(system: string, rightNow: string, turns: Turn[]): P
           properties: {
             reason: {
               type: 'string',
-              enum: ['lead', 'after_sales', 'asked_for_person', 'unsure', 'unknown_deal'],
+              enum: ['lead', 'after_sales', 'order_status', 'bulk_order', 'asked_for_person', 'unsure', 'unknown_deal'],
               description:
-                'unknown_deal = the customer asks about a deal, special or price (e.g. seen on Facebook) that is not in the knowledge.',
+                'lead = buying enquiry; after_sales = fault, spare part, return or refund; order_status = existing order or delivery; ' +
+                'bulk_order = large quantity, trade or wholesale; unknown_deal = a deal or price (e.g. seen on Facebook) not in the knowledge.',
             },
             category: {
               type: 'string',
