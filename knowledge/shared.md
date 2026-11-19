@@ -1,56 +1,78 @@
 <!--
 Shared company knowledge, used by every branch.
-Keep it as short bullet points. Replace every TODO with real information from Sunrose.
-Anything not written here, the assistant will say "a consultant will confirm".
+Source: sunrose.co.za home page and FAQs page (checked 19 Nov 2026).
+Keep it as short bullet points. Anything not written here, the assistant says "a consultant will confirm".
 -->
 
 ## About Sunrose
 
-- Sunrose Online is a South African commercial equipment distributor. Website: sunrose.co.za
+- Sunrose Online is a South African commercial equipment supplier. Website: sunrose.co.za
 - Branches: Durban, Johannesburg and Pretoria.
+- Sunrose also offers: distributor applications, installer registration, a points & rewards programme, downloadable product catalogues, and B2B invoices / bulk orders. Details for these are on the website.
 
-## Product categories
+## Product ranges (and the label to use when handing over)
 
-- Chillbros: cold rooms, prefab buildings, trailers, power tools
-- Snowbros: freezers, refrigeration, ice machines
-- Bakerbros: ovens, mixers, pizza equipment
-- Caterbros: cooking, serving, POS, power backup
-- Butcherbros: meat processing, packing, sausage preparation
-- Blu-Star Aircons
-- Combo Deals (equipment bundles)
-- Insulated Panels
-- Also on the website: Daily Specials, Promotions, Spares, Catalogues
+- **Snowbros** (label: snowbros): commercial fridges, display refrigeration, freezers, wall and multideck chillers, blast chillers, ice machines, slush and frozen desserts, beverage and juicing, cold rooms
+- **Butcherbros** (label: butcherbros): mincers, bandsaws, slicers, tenderisers, packing and weighing, poultry and display, sausage and biltong preparation
+- **Bakerbros** (label: bakerbros): ovens, mixers and dough prep, pizza equipment, slicers, baking tools, display units, special machines
+- **Caterbros** (label: caterbros): fryers, stoves, ovens, toasters and speciality cooking, beverage and cafe equipment, POS and cash handling, power and backup, serving and catering, Milex small appliances, ventilation and safety, work tables
+- **Blu-Star Air Conditioning** (label: aircon): air conditioners, cassette units, air curtains, accessories, installer deals
+- **Chillbros** (label: chillbros): insulated panels and roofing sheets, prefab buildings, power tools, trailers and mobile units
+- **Combo Deals** (label: combo-deal): bakery, butchery, cold storage and takeaway combos, plus Black November combos
+- **Spare parts** (label: spares)
+- Anything else, e.g. pool tables and sound equipment (label: other-product)
 
-## Current specials
+## Current specials (Black November, online prices)
 
-- Black November: Ubuntu Business Bundle, R97,499. Includes: J300 Bandsaw, 2m Meat Deli Display, 7L Sausage Filler, Mincer 12, Double Door Cooler, Cling Wrapper, 8-inch Meat Slicer. Ts & Cs apply.
-- TODO: other current specials and their prices
+Branch prices may vary. Stock can change; a consultant confirms.
+
+- Ubuntu Business Bundle: R97,499 (J300 bandsaw, 2m meat deli display, 7L sausage filler, Mincer 12, double door cooler, cling wrapper, 8-inch meat slicer). Ts & Cs apply.
+- All-in-One Street Kitchen 3-in-1 Combo: R55,799
+- Bakerman Combo: R23,895
+- Bakestart Combo: R7,999
+- Soft Serve Starter Combo: R26,499
+- Butchery Cold Start Combo: R69,999
+- Ice Cream Parlour Combo: R33,996
+- Infamous Kota Joe Bakery Essentials: R29,999
+- Cold room and freezer room solutions: R42,499 to R102,499
+- Slush machines: R18,999 to R28,500
+- Mobile coldroom: R36,999
+- Mobile kitchen solutions: R36,599 to R38,999
+- Insulated panels special: R1,250 to R1,899
+- Business combos: Butcher Essentials R60,999; Ice Cream & Snack R34,499; Bakery R17,999; Butcher Starter from R17,899; Mobile Freezer & MQC Meat Bandsaw R51,999; Butchery Equipment from R79,999
+
+## FAQs
+
+- Custom combos: yes, customers can build their own combo around their business; a consultant helps design the setup.
+- Aircon servicing: about every six months to keep it running efficiently.
+- Trading hours (all branches): Monday to Friday 8am to 5pm, Saturday 8am to 2:30pm. Sunday and public holiday hours: a consultant will confirm.
+- Installation: available on selected equipment. A consultant confirms for a specific product.
+- Warranty: most products come with a manufacturer warranty. A consultant confirms the terms for a specific product.
 
 ## Ordering and payment
 
-- Customers can order on the website (add to cart) or through a consultant.
-- Online payments go through Yoco and accept major credit and debit cards.
-- Bulk and trade quotes: a consultant needs the products, quantities, delivery destination and date needed.
-- TODO: EFT / in-store payment options
-- TODO: finance or lay-by options, if any
+- Customers can order on the website or through a consultant at any branch.
+- Payment: cash, EFT and card on selected items.
+- Online checkout accepts Visa, Mastercard, AMEX, Discover, SnapScan and Zapper.
+- Lay-by: three-month lay-bys with flexible deposits are available.
+- Bulk and trade orders: a consultant needs the products, quantities, delivery destination and date needed.
+- Online order questions: call or WhatsApp 067 090 4774.
 
 ## Delivery
 
-- Sunrose delivers nationwide across South Africa.
-- Delivery cost and timing depend on the product, quantity and destination, and are confirmed when the order is processed.
-- TODO: collection from branches, installation services
+- Nationwide delivery across South Africa.
+- Delivery usually takes three to five working days, depending on location.
+- Delivery cost depends on the product and location. For an exact price, call 067 090 4774 or hand over to a consultant.
 
 ## Policies
 
-- Stock can change. A consultant confirms availability, especially for urgent or bulk orders.
-- Product images are for illustration; specifications may differ.
-- TODO: Refunds and returns policy (summary)
-- TODO: Price Beat policy (summary)
-- TODO: Warranty terms by category
+- Sunrose has a Price Beat policy and a Refunds & Returns policy on the website. Do not explain or promise anything from them; hand over to a consultant.
+- TODO: short summary of the Price Beat and Refunds & Returns policies, if Sunrose wants the assistant to explain them
 
 ## Never promise
 
-- Discounts or price matches not listed here
-- Stock availability or delivery dates
-- Refunds, repairs or replacements
-- TODO: anything else Sunrose wants the assistant never to promise
+- Discounts, price matches or price beats
+- Stock availability or exact delivery dates
+- Refunds, repairs, replacements or warranty outcomes
+- Installation for a specific product without a consultant confirming
+- Branch prices (online prices can differ from branch prices)
