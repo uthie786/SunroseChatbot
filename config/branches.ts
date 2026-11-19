@@ -17,15 +17,16 @@ export type Branch = {
   name: string; // shown to the AI, e.g. "Durban"
   knowledgeFile: string; // file inside /knowledge
   teamId?: number; // Chatwoot team to assign on handover
-  assigneeId?: number; // Chatwoot agent to assign on handover
+  assigneeId?: number | 'admin'; // Chatwoot agent ID, or 'admin' = the login whose token is CHATWOOT_ADMIN_TOKEN
 };
 
+// Durban: everyone uses the admin login, so every Durban handover goes to its "Mine" list.
 const durban: Branch = {
   key: 'durban',
   name: 'Durban',
   knowledgeFile: 'durban.md',
-  teamId: undefined, // FILL IN: "Durban Sales" team ID, e.g. 3
-  assigneeId: undefined, // FILL IN: the Durban admin login's agent ID, e.g. 12345
+  teamId: undefined, // no Durban team
+  assigneeId: 'admin',
 };
 
 const johannesburg: Branch = {
