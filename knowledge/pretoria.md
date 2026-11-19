@@ -1,8 +1,9 @@
-<!-- Pretoria branch knowledge. Replace every TODO. -->
+<!-- Pretoria branch knowledge. Source: sunrose.co.za (19 Nov 2026). Replace the TODOs. -->
 
 - Address: 96 Fascia Rd, Silvertondale, Pretoria, 0184
-- Branch phone (from the website): +27 60 144 6390
-- TODO: trading hours (weekdays, Saturday, Sunday, public holidays)
-- TODO: what customers can view in the showroom
+- Branch phone: 060 144 6390
+- Online order support (call or WhatsApp): 067 090 4774
+- Trading hours: Monday to Friday 8am to 5pm, Saturday 8am to 2:30pm
+- TODO: what customers can see in the showroom
 - TODO: Pretoria-only specials
 - TODO: which salesperson handles which products
