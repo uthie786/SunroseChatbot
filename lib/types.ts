@@ -6,6 +6,8 @@ export type HandOverReason =
   | 'asked_for_person'
   | 'unsure'
   | 'unknown_deal' // customer asks about a deal/price that isn't in the knowledge
+  | 'bulk_order' // large / trade order: labelled bulk-order and set to high priority
+  | 'order_status' // existing order or delivery question
   | 'unsupported_media';
 
 // Product labels, matching Sunrose's own ranges (see knowledge/shared.md).
