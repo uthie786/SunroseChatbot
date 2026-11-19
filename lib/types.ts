@@ -21,6 +21,9 @@ export const CATEGORIES = [
   'chillbros',
   'combo-deal',
   'spares',
+  // Hardware, building and decor (knowledge/hardware.md)
+  'maestro', // Maestro Paints
+  'hardware', // everything else from Sunrose Importers & Wholesalers
   'other-product',
 ] as const;
 
