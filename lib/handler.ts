@@ -6,11 +6,13 @@ import {
   addPrivateNote,
   assignAgent,
   assignTeam,
+  getAdminUserId,
   getConversationStatus,
   getMessages,
   isIncoming,
   isOutgoing,
   sendReply,
+  setPriority,
   setStatus,
   type CwMessage,
 } from './chatwoot';
@@ -155,13 +157,28 @@ function toTurns(history: CwMessage[], latest: string): Turn[] {
   return trimmed;
 }
 
-// Team first (so the whole branch sees it), then a specific person if one is set.
+// Team first (so the whole branch sees it), then a specific login if one is set.
 async function assignBranch(conversationId: number, branch: Branch) {
   if (branch.teamId) await assignTeam(conversationId, branch.teamId);
-  if (branch.assigneeId) await assignAgent(conversationId, branch.assigneeId);
+  if (branch.assigneeId === 'admin') {
+    await assignAgent(conversationId, await getAdminUserId());
+  } else if (branch.assigneeId) {
+    await assignAgent(conversationId, branch.assigneeId);
+  }
   if (!branch.teamId && !branch.assigneeId) {
     console.log(`[bot] conv ${conversationId}: no teamId/assigneeId for ${branch.key}, left unassigned`);
   }
+}
+
+// Status label(s) for each handover reason, plus the product label.
+function labelsFor(d: Extract<Decision, { type: 'hand_over' }>): string[] {
+  const byReason: Record<string, string[]> = {
+    after_sales: ['after-sales'],
+    order_status: ['order-status'],
+    bulk_order: ['lead', 'bulk-order'],
+    unknown_deal: ['lead', 'deal-check'],
+  };
+  return [...(byReason[d.reason] ?? ['lead']), d.category];
 }
 
 async function handOver(
@@ -171,9 +188,10 @@ async function handOver(
 ) {
   await sendReply(conversationId, d.messageToCustomer);
 
-  const labels: string[] = [d.reason === 'after_sales' ? 'after-sales' : 'lead', d.category];
-  if (d.reason === 'unknown_deal') labels.push('deal-check');
-  await addLabels(conversationId, labels).catch((e) => console.error('[bot] labels failed:', e));
+  await addLabels(conversationId, labelsFor(d)).catch((e) => console.error('[bot] labels failed:', e));
+  if (d.reason === 'bulk_order') {
+    await setPriority(conversationId, 'high').catch((e) => console.error('[bot] priority failed:', e));
+  }
 
   const note = [
     'Bot summary',
