@@ -1,4 +1,5 @@
 import { BRANCHES_BY_INBOX, type Branch } from '@/config/branches';
+import { businessStatusText, getBusinessStatus } from '@/config/hours';
 import {
   addLabels,
   addPrivateNote,
@@ -74,6 +75,8 @@ export async function handleEvent(body: ChatwootEvent) {
       return;
     }
 
+    const hours = getBusinessStatus();
+
     // 5. Voice notes, photos and files: the bot can't read them, so hand over.
     const content = (body.content ?? '').trim();
     if (!content) {
@@ -82,7 +85,9 @@ export async function handleEvent(body: ChatwootEvent) {
         reason: 'unsupported_media',
         category: 'other-product',
         summary: 'Customer sent a voice note, photo or file that the bot cannot read.',
-        messageToCustomer: 'Thanks! A Sunrose consultant will look at this and get back to you shortly.',
+        messageToCustomer: hours.isOpen
+          ? 'Thanks! A Sunrose consultant will look at this and get back to you shortly.'
+          : `Thanks! Our team is closed right now. A Sunrose consultant will look at this and reply ${hours.nextOpenText}.`,
       });
       log('media message, handed over');
       return;
@@ -92,8 +97,8 @@ export async function handleEvent(body: ChatwootEvent) {
     const turns = toTurns(history, content);
     const decision: Decision =
       process.env.BOT_MODE === 'live'
-        ? await decide(buildSystemPrompt(branch), turns)
-        : mockDecide(turns);
+        ? await decide(buildSystemPrompt(branch), businessStatusText(hours), turns)
+        : mockDecide(turns, hours);
 
     // 7. Carry it out.
     if (decision.type === 'reply') {
@@ -137,9 +142,13 @@ function toTurns(history: CwMessage[], latest: string): Turn[] {
   return trimmed;
 }
 
+// Team first (so the whole branch sees it), then a specific person if one is set.
 async function assignBranch(conversationId: number, branch: Branch) {
   if (branch.teamId) await assignTeam(conversationId, branch.teamId);
-  else if (branch.assigneeId) await assignAgent(conversationId, branch.assigneeId);
+  if (branch.assigneeId) await assignAgent(conversationId, branch.assigneeId);
+  if (!branch.teamId && !branch.assigneeId) {
+    console.log(`[bot] conv ${conversationId}: no teamId/assigneeId for ${branch.key}, left unassigned`);
+  }
 }
 
 async function handOver(
