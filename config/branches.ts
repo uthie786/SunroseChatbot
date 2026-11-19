@@ -45,9 +45,9 @@ const pretoria: Branch = {
 };
 
 export const BRANCHES_BY_INBOX: Record<number, Branch> = {
-  // Bot Test inbox. PUT YOUR REAL BOT TEST INBOX ID BACK HERE (the one you used before).
+  // Bot Test inbox.
   // Change "durban" to johannesburg or pretoria to test those branches.
-  111111: durban,
+  157844: durban,
 
   // Live WhatsApp inboxes. Remove the // at the start of a line on that branch's go-live day.
   // 222222: durban,       // Sunrose Online WhatsApp, 073 400 4991  (FILL IN inbox ID)
