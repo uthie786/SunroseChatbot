@@ -32,7 +32,12 @@ export async function decide(system: string, rightNow: string, turns: Turn[]): P
         input_schema: {
           type: 'object',
           properties: {
-            reason: { type: 'string', enum: ['lead', 'after_sales', 'asked_for_person', 'unsure'] },
+            reason: {
+              type: 'string',
+              enum: ['lead', 'after_sales', 'asked_for_person', 'unsure', 'unknown_deal'],
+              description:
+                'unknown_deal = the customer asks about a deal, special or price (e.g. seen on Facebook) that is not in the knowledge.',
+            },
             category: {
               type: 'string',
               enum: [...CATEGORIES],
