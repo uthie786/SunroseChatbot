@@ -171,7 +171,8 @@ async function handOver(
 ) {
   await sendReply(conversationId, d.messageToCustomer);
 
-  const labels = [d.reason === 'after_sales' ? 'after-sales' : 'lead', d.category];
+  const labels: string[] = [d.reason === 'after_sales' ? 'after-sales' : 'lead', d.category];
+  if (d.reason === 'unknown_deal') labels.push('deal-check');
   await addLabels(conversationId, labels).catch((e) => console.error('[bot] labels failed:', e));
 
   const note = [
