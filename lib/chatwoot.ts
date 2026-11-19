@@ -47,6 +47,8 @@ export type CwMessage = {
   message_type: number | string; // 0/'incoming', 1/'outgoing', 2/'activity', 3/'template'
   private: boolean;
   created_at: number;
+  content_attributes?: unknown; // holds ad referrals, among other things
+  additional_attributes?: unknown;
 };
 
 export function isIncoming(m: CwMessage) {
