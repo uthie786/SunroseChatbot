@@ -98,6 +98,11 @@ export async function setStatus(conversationId: number, status: 'open' | 'resolv
   return cwAsBot(`/conversations/${conversationId}/toggle_status`, 'POST', { status });
 }
 
+// Conversation priority (shows as a flag in Chatwoot and can be filtered/sorted on).
+export async function setPriority(conversationId: number, priority: 'urgent' | 'high' | 'medium' | 'low') {
+  return cw(`/conversations/${conversationId}/toggle_priority`, ADMIN_TOKEN, 'POST', { priority });
+}
+
 export async function assignTeam(conversationId: number, teamId: number) {
   return cw(`/conversations/${conversationId}/assignments`, ADMIN_TOKEN, 'POST', { team_id: teamId });
 }
