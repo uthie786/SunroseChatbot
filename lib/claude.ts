@@ -12,11 +12,16 @@ function getClient() {
 
 // Ask Claude what to do with the latest customer message.
 // Claude either writes a reply, or calls one of two tools; our code carries the tool out.
-export async function decide(system: string, turns: Turn[]): Promise<Decision> {
+// `system` = rules + knowledge (the same every time, so it is cached).
+// `rightNow` = current date/time and open/closed status (changes, so it goes after the cached part).
+export async function decide(system: string, rightNow: string, turns: Turn[]): Promise<Decision> {
   const res = await getClient().messages.create({
     model: MODEL,
     max_tokens: 700,
-    system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+    system: [
+      { type: 'text', text: system, cache_control: { type: 'ephemeral' } },
+      { type: 'text', text: rightNow },
+    ],
     messages: turns,
     tools: [
       {
@@ -40,7 +45,9 @@ export async function decide(system: string, turns: Turn[]): Promise<Decision> {
             summary: { type: 'string', description: 'One or two sentences for the salesperson.' },
             message_to_customer: {
               type: 'string',
-              description: 'Short message telling the customer a consultant will continue the chat.',
+              description:
+                'Short message telling the customer what happens next. If Sunrose is OPEN: a consultant will continue the chat. ' +
+                'If CLOSED: the team is closed and a consultant will reply at the next opening time (say when). Never say "now" or "shortly" when closed.',
             },
           },
           required: ['reason', 'category', 'summary', 'message_to_customer'],
