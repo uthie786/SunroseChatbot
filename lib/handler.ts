@@ -1,4 +1,5 @@
 import { BRANCHES_BY_INBOX, type Branch } from '@/config/branches';
+import { adContextText, findAdInConversation } from './ad';
 import { businessStatusText, getBusinessStatus } from '@/config/hours';
 import {
   addLabels,
@@ -30,8 +31,10 @@ type ChatwootEvent = {
   content?: string | null;
   message_type?: string | number;
   private?: boolean;
-  conversation?: { id?: number; status?: string; inbox_id?: number };
+  conversation?: { id?: number; status?: string; inbox_id?: number; additional_attributes?: unknown };
   inbox?: { id?: number };
+  content_attributes?: unknown;
+  additional_attributes?: unknown;
 };
 
 export async function handleEvent(body: ChatwootEvent) {
@@ -93,11 +96,21 @@ export async function handleEvent(body: ChatwootEvent) {
       return;
     }
 
-    // 6. Ask the AI (or the mock) what to do.
+    // 6. Did they come from an ad? (Meta attaches the ad to their first message.)
+    const ad = findAdInConversation([
+      body.content_attributes,
+      body.additional_attributes,
+      body.conversation?.additional_attributes,
+      ...history.flatMap((m) => [m.content_attributes, m.additional_attributes]),
+    ]);
+    if (ad) log(`came from an ad: ${ad.headline ?? ad.sourceUrl ?? 'no headline'}`);
+
+    // 7. Ask the AI (or the mock) what to do.
     const turns = toTurns(history, content);
+    const rightNow = [businessStatusText(hours), adContextText(ad)].filter(Boolean).join('\n\n');
     const decision: Decision =
       process.env.BOT_MODE === 'live'
-        ? await decide(buildSystemPrompt(branch), businessStatusText(hours), turns)
+        ? await decide(buildSystemPrompt(branch), rightNow, turns)
         : mockDecide(turns, hours);
 
     // 7. Carry it out.
