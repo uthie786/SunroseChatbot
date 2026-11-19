@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { Category, Decision, HandOverReason, Turn } from './types';
+import { CATEGORIES, type Category, type Decision, type HandOverReason, type Turn } from './types';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'claude-haiku-5-5';
 
@@ -30,7 +30,8 @@ export async function decide(system: string, turns: Turn[]): Promise<Decision> {
             reason: { type: 'string', enum: ['lead', 'after_sales', 'asked_for_person', 'unsure'] },
             category: {
               type: 'string',
-              enum: ['aircon', 'butchery', 'refrigeration', 'catering', 'bakery', 'combo-deal', 'other-product'],
+              enum: [...CATEGORIES],
+              description: 'The product range label from the knowledge (e.g. snowbros for fridges and freezers).',
             },
             customer_name: { type: 'string' },
             product: { type: 'string' },
@@ -65,7 +66,9 @@ export async function decide(system: string, turns: Turn[]): Promise<Decision> {
       return {
         type: 'hand_over',
         reason: (input.reason as HandOverReason) ?? 'unsure',
-        category: (input.category as Category) ?? 'other-product',
+        category: CATEGORIES.includes(input.category as Category)
+          ? (input.category as Category)
+          : 'other-product',
         customerName: input.customer_name,
         product: input.product,
         quantity: input.quantity,
