@@ -7,14 +7,21 @@ export type HandOverReason =
   | 'unsure'
   | 'unsupported_media';
 
-export type Category =
-  | 'aircon'
-  | 'butchery'
-  | 'refrigeration'
-  | 'catering'
-  | 'bakery'
-  | 'combo-deal'
-  | 'other-product';
+// Product labels, matching Sunrose's own ranges (see knowledge/shared.md).
+// Each one must also exist as a label in Chatwoot (Settings > Labels).
+export const CATEGORIES = [
+  'snowbros',
+  'butcherbros',
+  'bakerbros',
+  'caterbros',
+  'aircon',
+  'chillbros',
+  'combo-deal',
+  'spares',
+  'other-product',
+] as const;
+
+export type Category = (typeof CATEGORIES)[number];
 
 export type Decision =
   | { type: 'reply'; text: string }
