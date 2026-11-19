@@ -98,6 +98,40 @@ export async function setStatus(conversationId: number, status: 'open' | 'resolv
   return cwAsBot(`/conversations/${conversationId}/toggle_status`, 'POST', { status });
 }
 
+// The Chatwoot user that owns CHATWOOT_ADMIN_TOKEN (the admin login). Looked up once, then remembered.
+let adminUserId: number | null = null;
+export async function getAdminUserId(): Promise<number> {
+  if (adminUserId) return adminUserId;
+  const res = await fetch(`${BASE}/api/v1/profile`, { headers: { api_access_token: ADMIN_TOKEN } });
+  if (!res.ok) throw new ChatwootError(res.status, `Chatwoot GET /profile -> ${res.status}`);
+  const profile = (await res.json()) as { id?: number };
+  if (!profile.id) throw new Error('Chatwoot profile has no id');
+  adminUserId = profile.id;
+  return adminUserId;
+}
+
+// For the ID lookup page (/api/chatwoot?secret=...&list=ids): names and IDs of agents, teams and inboxes.
+export async function listIds() {
+  const pick = (items: unknown) =>
+    (Array.isArray(items) ? items : []).map((x: Record<string, unknown>) => ({
+      id: x.id,
+      name: x.name ?? x.available_name,
+      ...(x.email ? { email: x.email } : {}),
+      ...(x.role ? { role: x.role } : {}),
+      ...(x.channel_type ? { type: x.channel_type } : {}),
+    }));
+  const [agents, teams, inboxes] = await Promise.all([
+    cw('/agents', ADMIN_TOKEN).catch(() => []),
+    cw('/teams', ADMIN_TOKEN).catch(() => []),
+    cw('/inboxes', ADMIN_TOKEN).catch(() => ({ payload: [] })),
+  ]);
+  return {
+    agents: pick(agents),
+    teams: pick(teams),
+    inboxes: pick(inboxes?.payload ?? inboxes),
+  };
+}
+
 // Conversation priority (shows as a flag in Chatwoot and can be filtered/sorted on).
 export async function setPriority(conversationId: number, priority: 'urgent' | 'high' | 'medium' | 'low') {
   return cw(`/conversations/${conversationId}/toggle_priority`, ADMIN_TOKEN, 'POST', { priority });
