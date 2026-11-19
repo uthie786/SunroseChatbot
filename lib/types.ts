@@ -5,6 +5,7 @@ export type HandOverReason =
   | 'after_sales'
   | 'asked_for_person'
   | 'unsure'
+  | 'unknown_deal' // customer asks about a deal/price that isn't in the knowledge
   | 'unsupported_media';
 
 // Product labels, matching Sunrose's own ranges (see knowledge/shared.md).
