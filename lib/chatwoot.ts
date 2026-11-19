@@ -1,112 +1,216 @@
-// Small helpers for the Chatwoot API.
-// Docs: https://developers.chatwoot.com/api-reference
+import { BRANCHES_BY_INBOX, type Branch } from '@/config/branches';
+import { adContextText, findAdInConversation } from './ad';
+import { businessStatusText, getBusinessStatus } from '@/config/hours';
+import {
+  addLabels,
+  addPrivateNote,
+  assignAgent,
+  assignTeam,
+  getConversationStatus,
+  getMessages,
+  isIncoming,
+  isOutgoing,
+  sendReply,
+  setPriority,
+  setStatus,
+  type CwMessage,
+} from './chatwoot';
+import { decide } from './claude';
+import { buildSystemPrompt } from './knowledge';
+import { mockDecide } from './mock';
+import type { Decision, Turn } from './types';
 
-const BASE = (process.env.CHATWOOT_URL ?? 'https://app.chatwoot.com').replace(/\/$/, '');
-const ACCOUNT = process.env.CHATWOOT_ACCOUNT_ID;
-const BOT_TOKEN = process.env.CHATWOOT_BOT_TOKEN ?? '';
-const ADMIN_TOKEN = process.env.CHATWOOT_ADMIN_TOKEN ?? '';
+const DEBOUNCE_MS = Number(process.env.DEBOUNCE_MS ?? 4000);
+const MAX_TURNS = 20;
 
-type Method = 'GET' | 'POST';
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-class ChatwootError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-  }
-}
-
-async function cw(path: string, token: string, method: Method = 'GET', body?: unknown) {
-  if (!ACCOUNT) throw new Error('CHATWOOT_ACCOUNT_ID is not set');
-  const res = await fetch(`${BASE}/api/v1/accounts/${ACCOUNT}${path}`, {
-    method,
-    headers: { 'Content-Type': 'application/json', api_access_token: token },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const text = await res.text();
-  if (!res.ok) {
-    throw new ChatwootError(res.status, `Chatwoot ${method} ${path} -> ${res.status}: ${text.slice(0, 300)}`);
-  }
-  return text ? JSON.parse(text) : null;
-}
-
-// Try with the bot token first (so actions show as the bot); fall back to the admin token
-// if the bot token isn't allowed to do this.
-async function cwAsBot(path: string, method: Method, body?: unknown) {
-  try {
-    return await cw(path, BOT_TOKEN, method, body);
-  } catch (err) {
-    if (err instanceof ChatwootError && [401, 403, 404].includes(err.status) && ADMIN_TOKEN) {
-      return cw(path, ADMIN_TOKEN, method, body);
-    }
-    throw err;
-  }
-}
-
-export type CwMessage = {
-  id: number;
-  content: string | null;
-  message_type: number | string; // 0/'incoming', 1/'outgoing', 2/'activity', 3/'template'
-  private: boolean;
-  created_at: number;
-  content_attributes?: unknown; // holds ad referrals, among other things
+// The shape of the Chatwoot webhook we use. Chatwoot sends more fields than this.
+type ChatwootEvent = {
+  event?: string;
+  id?: number;
+  content?: string | null;
+  message_type?: string | number;
+  private?: boolean;
+  conversation?: { id?: number; status?: string; inbox_id?: number; additional_attributes?: unknown };
+  inbox?: { id?: number };
+  content_attributes?: unknown;
   additional_attributes?: unknown;
 };
 
-export function isIncoming(m: CwMessage) {
-  return m.message_type === 0 || m.message_type === 'incoming';
+export async function handleEvent(body: ChatwootEvent) {
+  // 1. Only new incoming customer messages.
+  if (body.event !== 'message_created') return;
+  if (!(body.message_type === 'incoming' || body.message_type === 0) || body.private) return;
+
+  const conversationId = body.conversation?.id;
+  const inboxId = body.inbox?.id ?? body.conversation?.inbox_id;
+  if (!conversationId || !inboxId) return;
+
+  // 2. Only inboxes listed in config/branches.ts.
+  const branch = BRANCHES_BY_INBOX[inboxId];
+  if (!branch) {
+    console.log(`[bot] ignoring inbox ${inboxId} (not in config/branches.ts)`);
+    return;
+  }
+
+  const log = (msg: string) => console.log(`[bot] conv ${conversationId} (${branch.key}): ${msg}`);
+
+  // 3. Only while the bot owns the chat. "open" means a person has it.
+  if (body.conversation?.status && body.conversation.status !== 'pending') {
+    log(`status is ${body.conversation.status}, staying silent`);
+    return;
+  }
+
+  try {
+    // 4. Wait briefly so several quick messages get one reply.
+    await sleep(DEBOUNCE_MS);
+
+    const status = await getConversationStatus(conversationId);
+    if (status && status !== 'pending') {
+      log(`status changed to ${status} while waiting, staying silent`);
+      return;
+    }
+
+    const history = await getMessages(conversationId);
+    const lastIncoming = [...history].reverse().find(isIncoming);
+    if (body.id && lastIncoming && lastIncoming.id !== body.id) {
+      log('a newer customer message arrived, letting that one answer');
+      return;
+    }
+
+    const hours = getBusinessStatus();
+
+    // 5. Voice notes, photos and files: the bot can't read them, so hand over.
+    const content = (body.content ?? '').trim();
+    if (!content) {
+      await handOver(conversationId, branch, {
+        type: 'hand_over',
+        reason: 'unsupported_media',
+        category: 'other-product',
+        summary: 'Customer sent a voice note, photo or file that the bot cannot read.',
+        messageToCustomer: hours.isOpen
+          ? 'Thanks! A Sunrose consultant will look at this and get back to you shortly.'
+          : `Thanks! Our team is closed right now. A Sunrose consultant will look at this and reply ${hours.nextOpenText}.`,
+      });
+      log('media message, handed over');
+      return;
+    }
+
+    // 6. Did they come from an ad? (Meta attaches the ad to their first message.)
+    const ad = findAdInConversation([
+      body.content_attributes,
+      body.additional_attributes,
+      body.conversation?.additional_attributes,
+      ...history.flatMap((m) => [m.content_attributes, m.additional_attributes]),
+    ]);
+    if (ad) log(`came from an ad: ${ad.headline ?? ad.sourceUrl ?? 'no headline'}`);
+
+    // 7. Ask the AI (or the mock) what to do.
+    const turns = toTurns(history, content);
+    const rightNow = [businessStatusText(hours), adContextText(ad)].filter(Boolean).join('\n\n');
+    const decision: Decision =
+      process.env.BOT_MODE === 'live'
+        ? await decide(buildSystemPrompt(branch), rightNow, turns)
+        : mockDecide(turns, hours);
+
+    // 7. Carry it out.
+    if (decision.type === 'reply') {
+      await sendReply(conversationId, decision.text);
+      log('replied');
+    } else if (decision.type === 'hand_over') {
+      await handOver(conversationId, branch, decision);
+      log(`handed over (${decision.reason}, ${decision.category})`);
+    } else {
+      await closeJunk(conversationId);
+      log('closed as junk');
+    }
+  } catch (err) {
+    // 8. Anything fails: a person gets the chat. Never leave the customer hanging.
+    console.error(`[bot] conv ${conversationId} error:`, err);
+    await fallback(conversationId, branch).catch((e) =>
+      console.error(`[bot] conv ${conversationId} fallback also failed:`, e),
+    );
+  }
 }
 
-export function isOutgoing(m: CwMessage) {
-  return [1, 3, 'outgoing', 'template'].includes(m.message_type);
+// Chatwoot history -> alternating user/assistant turns for Claude.
+function toTurns(history: CwMessage[], latest: string): Turn[] {
+  const turns: Turn[] = [];
+  for (const m of history) {
+    const text = m.content?.trim();
+    if (m.private || !text) continue;
+    const role = isIncoming(m) ? 'user' : isOutgoing(m) ? 'assistant' : null;
+    if (!role) continue; // activity messages etc.
+    const prev = turns.at(-1);
+    if (prev && prev.role === role) prev.content += `\n${text}`;
+    else turns.push({ role, content: text });
+  }
+
+  // Claude needs the conversation to start and end with the customer.
+  while (turns.length && turns[0].role !== 'user') turns.shift();
+  if (!turns.length || turns.at(-1)?.role !== 'user') turns.push({ role: 'user', content: latest });
+
+  let trimmed = turns.slice(-MAX_TURNS);
+  while (trimmed.length && trimmed[0].role !== 'user') trimmed = trimmed.slice(1);
+  return trimmed;
 }
 
-export async function getMessages(conversationId: number): Promise<CwMessage[]> {
-  const data = await cw(`/conversations/${conversationId}/messages`, ADMIN_TOKEN);
-  const list: CwMessage[] = data?.payload ?? [];
-  return [...list].sort((a, b) => a.created_at - b.created_at);
+// Team first (so the whole branch sees it), then a specific person if one is set.
+async function assignBranch(conversationId: number, branch: Branch) {
+  if (branch.teamId) await assignTeam(conversationId, branch.teamId);
+  if (branch.assigneeId) await assignAgent(conversationId, branch.assigneeId);
+  if (!branch.teamId && !branch.assigneeId) {
+    console.log(`[bot] conv ${conversationId}: no teamId/assigneeId for ${branch.key}, left unassigned`);
+  }
 }
 
-export async function getConversationStatus(conversationId: number): Promise<string | undefined> {
-  const data = await cw(`/conversations/${conversationId}`, ADMIN_TOKEN);
-  return data?.status;
+// Status label(s) for each handover reason, plus the product label.
+function labelsFor(d: Extract<Decision, { type: 'hand_over' }>): string[] {
+  const byReason: Record<string, string[]> = {
+    after_sales: ['after-sales'],
+    order_status: ['order-status'],
+    bulk_order: ['lead', 'bulk-order'],
+    unknown_deal: ['lead', 'deal-check'],
+  };
+  return [...(byReason[d.reason] ?? ['lead']), d.category];
 }
 
-export async function sendReply(conversationId: number, content: string) {
-  return cwAsBot(`/conversations/${conversationId}/messages`, 'POST', {
-    content,
-    message_type: 'outgoing',
-    private: false,
-  });
+async function handOver(
+  conversationId: number,
+  branch: Branch,
+  d: Extract<Decision, { type: 'hand_over' }>,
+) {
+  await sendReply(conversationId, d.messageToCustomer);
+
+  await addLabels(conversationId, labelsFor(d)).catch((e) => console.error('[bot] labels failed:', e));
+  if (d.reason === 'bulk_order') {
+    await setPriority(conversationId, 'high').catch((e) => console.error('[bot] priority failed:', e));
+  }
+
+  const note = [
+    'Bot summary',
+    `Reason: ${d.reason.replace(/_/g, ' ')}`,
+    `Name: ${d.customerName || 'not given'}`,
+    `Product: ${d.product || 'not given'}`,
+    `Quantity: ${d.quantity || 'not given'}`,
+    `Use: ${d.use || 'not given'}`,
+    `Summary: ${d.summary}`,
+  ].join('\n');
+  await addPrivateNote(conversationId, note);
+
+  await setStatus(conversationId, 'open');
+  await assignBranch(conversationId, branch).catch((e) => console.error('[bot] assign failed:', e));
 }
 
-export async function addPrivateNote(conversationId: number, content: string) {
-  return cwAsBot(`/conversations/${conversationId}/messages`, 'POST', {
-    content,
-    message_type: 'outgoing',
-    private: true,
-  });
+async function closeJunk(conversationId: number) {
+  await addLabels(conversationId, ['junk']).catch((e) => console.error('[bot] labels failed:', e));
+  await setStatus(conversationId, 'resolved');
 }
 
-// Chatwoot replaces the whole label list, so read the current labels and merge.
-export async function addLabels(conversationId: number, labels: string[]) {
-  const current = await cw(`/conversations/${conversationId}/labels`, ADMIN_TOKEN);
-  const existing: string[] = current?.payload ?? [];
-  const merged = Array.from(new Set([...existing, ...labels]));
-  return cw(`/conversations/${conversationId}/labels`, ADMIN_TOKEN, 'POST', { labels: merged });
-}
-
-export async function setStatus(conversationId: number, status: 'open' | 'resolved' | 'pending') {
-  return cwAsBot(`/conversations/${conversationId}/toggle_status`, 'POST', { status });
-}
-
-// Conversation priority (shows as a flag in Chatwoot and can be filtered/sorted on).
-export async function setPriority(conversationId: number, priority: 'urgent' | 'high' | 'medium' | 'low') {
-  return cw(`/conversations/${conversationId}/toggle_priority`, ADMIN_TOKEN, 'POST', { priority });
-}
-
-export async function assignTeam(conversationId: number, teamId: number) {
-  return cw(`/conversations/${conversationId}/assignments`, ADMIN_TOKEN, 'POST', { team_id: teamId });
-}
-
-export async function assignAgent(conversationId: number, assigneeId: number) {
-  return cw(`/conversations/${conversationId}/assignments`, ADMIN_TOKEN, 'POST', { assignee_id: assigneeId });
+async function fallback(conversationId: number, branch: Branch) {
+  await addPrivateNote(conversationId, 'Bot error: the assistant could not reply. Please take over this chat.');
+  await addLabels(conversationId, ['bot-error']).catch(() => undefined);
+  await setStatus(conversationId, 'open');
+  await assignBranch(conversationId, branch).catch(() => undefined);
 }
