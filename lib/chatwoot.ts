@@ -70,6 +70,22 @@ export async function getConversationStatus(conversationId: number): Promise<str
   return data?.status;
 }
 
+// Status plus when the chat was first created (unix seconds), for spotting old chats.
+export async function getConversationInfo(
+  conversationId: number,
+): Promise<{ status?: string; createdAt?: number }> {
+  const data = await cw(`/conversations/${conversationId}`, ADMIN_TOKEN);
+  const raw = data?.created_at;
+  let createdAt: number | undefined;
+  if (typeof raw === 'number') createdAt = raw > 1e12 ? Math.floor(raw / 1000) : raw;
+  else if (typeof raw === 'string') {
+    const n = Number(raw);
+    const t = Number.isFinite(n) ? n : Date.parse(raw) / 1000;
+    if (Number.isFinite(t)) createdAt = t > 1e12 ? Math.floor(t / 1000) : t;
+  }
+  return { status: data?.status, createdAt };
+}
+
 export async function sendReply(conversationId: number, content: string) {
   return cwAsBot(`/conversations/${conversationId}/messages`, 'POST', {
     content,
