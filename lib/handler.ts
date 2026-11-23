@@ -7,7 +7,7 @@ import {
   assignAgent,
   assignTeam,
   getAdminUserId,
-  getConversationStatus,
+  getConversationInfo,
   getMessages,
   isIncoming,
   isOutgoing,
@@ -23,6 +23,8 @@ import type { Decision, Turn } from './types';
 
 const DEBOUNCE_MS = Number(process.env.DEBOUNCE_MS ?? 4000);
 const MAX_TURNS = 20;
+// Chats older than this are "returning" customers: the bot stays out and staff take them.
+const MAX_CHAT_AGE_HOURS = Number(process.env.BOT_MAX_CHAT_AGE_HOURS ?? 12);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -67,9 +69,9 @@ export async function handleEvent(body: ChatwootEvent) {
     // 4. Wait briefly so several quick messages get one reply.
     await sleep(DEBOUNCE_MS);
 
-    const status = await getConversationStatus(conversationId);
-    if (status && status !== 'pending') {
-      log(`status changed to ${status} while waiting, staying silent`);
+    const info = await getConversationInfo(conversationId);
+    if (info.status && info.status !== 'pending') {
+      log(`status changed to ${info.status} while waiting, staying silent`);
       return;
     }
 
@@ -77,6 +79,15 @@ export async function handleEvent(body: ChatwootEvent) {
     const lastIncoming = [...history].reverse().find(isIncoming);
     if (body.id && lastIncoming && lastIncoming.id !== body.id) {
       log('a newer customer message arrived, letting that one answer');
+      return;
+    }
+
+    // Old chat that got a new message (e.g. reopened after being resolved):
+    // the bot doesn't know the earlier context, so pass it straight to staff without replying.
+    const createdAt = info.createdAt ?? history[0]?.created_at;
+    if (createdAt && Date.now() / 1000 - createdAt > MAX_CHAT_AGE_HOURS * 3600) {
+      await passToStaffSilently(conversationId, branch);
+      log('returning customer (old chat), passed to staff without replying');
       return;
     }
 
@@ -204,6 +215,16 @@ async function handOver(
   ].join('\n');
   await addPrivateNote(conversationId, note);
 
+  await setStatus(conversationId, 'open');
+  await assignBranch(conversationId, branch).catch((e) => console.error('[bot] assign failed:', e));
+}
+
+async function passToStaffSilently(conversationId: number, branch: Branch) {
+  await addLabels(conversationId, ['returning']).catch((e) => console.error('[bot] labels failed:', e));
+  await addPrivateNote(
+    conversationId,
+    'Returning customer: this is an older chat, so the bot did not reply. Please read the history and reply.',
+  );
   await setStatus(conversationId, 'open');
   await assignBranch(conversationId, branch).catch((e) => console.error('[bot] assign failed:', e));
 }
