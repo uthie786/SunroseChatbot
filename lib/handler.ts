@@ -247,6 +247,14 @@ async function closeJunk(conversationId: number) {
 }
 
 async function fallback(conversationId: number, branch: Branch) {
+  // Let the customer know someone will reply, so they aren't left with silence.
+  const hours = getBusinessStatus();
+  await sendReply(
+    conversationId,
+    hours.isOpen
+      ? 'Thanks for your message! A Sunrose consultant will get back to you shortly.'
+      : `Thanks for your message! Our team is closed right now. A Sunrose consultant will reply ${hours.nextOpenText}.`,
+  ).catch((e) => console.error('[bot] fallback reply failed:', e));
   await addPrivateNote(conversationId, 'Bot error: the assistant could not reply. Please take over this chat.');
   await addLabels(conversationId, ['bot-error']).catch(() => undefined);
   await setStatus(conversationId, 'open');
