@@ -1,5 +1,6 @@
 import { after, NextResponse, type NextRequest } from 'next/server';
 import { handleEvent } from '@/lib/handler';
+import { listIds } from '@/lib/chatwoot';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -28,7 +29,15 @@ export async function POST(req: NextRequest) {
 }
 
 // Visit /api/chatwoot in a browser to check the deployment is alive.
-export async function GET() {
+// Visit /api/chatwoot?secret=<WEBHOOK_SECRET>&list=ids to see agent, team and inbox IDs.
+export async function GET(req: NextRequest) {
+  const secret = req.nextUrl.searchParams.get('secret');
+  if (req.nextUrl.searchParams.get('list') === 'ids') {
+    if (!process.env.WEBHOOK_SECRET || secret !== process.env.WEBHOOK_SECRET) {
+      return NextResponse.json({ ok: false }, { status: 401 });
+    }
+    return NextResponse.json(await listIds());
+  }
   return NextResponse.json({
     ok: true,
     service: 'sunrose-chatbot',
