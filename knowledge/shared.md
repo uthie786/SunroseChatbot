@@ -38,6 +38,7 @@ Branch prices may vary. Stock can change; a consultant confirms.
 - Slush machines: R18,999 to R28,500
 - Mobile coldroom: R36,999
 - Mobile kitchen solutions: R36,599 to R38,999
+- Shawarma Kitchen Combo (Shawarma in Motion Mobile Kitchen Package, Standard): R49,999. Mobile kitchen trailer with a 3-burner shawarma machine, double gas fryer, table-mount chip cutter and 9-slice toaster. Ts & Cs apply.
 - Insulated panels special: R1,250 to R1,899
 - Business combos: Butcher Essentials R60,999; Ice Cream & Snack R34,499; Bakery R17,999; Butcher Starter from R17,899; Mobile Freezer & MQC Meat Bandsaw R51,999; Butchery Equipment from R79,999
 
