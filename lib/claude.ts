@@ -15,6 +15,22 @@ function getClient() {
 // `system` = rules + knowledge (the same every time, so it is cached).
 // `rightNow` = current date/time and open/closed status (changes, so it goes after the cached part).
 export async function decide(system: string, rightNow: string, turns: Turn[]): Promise<Decision> {
+  const first = await ask(system, rightNow, turns, false);
+  if (first) return first;
+  // Rarely Claude answers with nothing at all. Try once more, this time requiring a tool call,
+  // so the worst case is a normal handover with a summary instead of a silent chat.
+  console.warn('[bot] Claude returned nothing, retrying with a required tool call');
+  const second = await ask(system, rightNow, turns, true);
+  if (second) return second;
+  throw new Error('Claude returned no text and no tool call (twice)');
+}
+
+async function ask(
+  system: string,
+  rightNow: string,
+  turns: Turn[],
+  forceTool: boolean,
+): Promise<Decision | null> {
   const res = await getClient().messages.create({
     model: MODEL,
     max_tokens: 700,
@@ -70,6 +86,7 @@ export async function decide(system: string, rightNow: string, turns: Turn[]): P
         },
       },
     ],
+    ...(forceTool ? { tool_choice: { type: 'any' as const } } : {}),
   });
 
   const toolUse = res.content.find((block) => block.type === 'tool_use');
@@ -100,6 +117,11 @@ export async function decide(system: string, rightNow: string, turns: Turn[]): P
     .flatMap((block) => (block.type === 'text' ? [block.text] : []))
     .join('\n')
     .trim();
-  if (!text) throw new Error('Claude returned no text and no tool call');
+  if (!text) {
+    console.warn(
+      `[bot] empty Claude response: stop_reason=${res.stop_reason}, blocks=${JSON.stringify(res.content).slice(0, 500)}`,
+    );
+    return null;
+  }
   return { type: 'reply', text };
 }
