@@ -12,8 +12,15 @@ function str(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim().slice(0, MAX_TEXT) : undefined;
 }
 
+const AD_KEYS = [
+  'headline', 'source_url', 'sourceUrl', 'ctwa_clid', 'ctwaClid', 'source_id', 'sourceId',
+  'ad_title', 'adTitle', 'ad_headline',
+];
+
 function looksLikeAd(obj: Record<string, unknown>) {
-  return ['headline', 'source_url', 'ctwa_clid', 'source_id'].some((k) => typeof obj[k] === 'string');
+  if (AD_KEYS.some((k) => typeof obj[k] === 'string')) return true;
+  // Meta's referral object: { source_type: 'ad', ... }
+  return obj.source_type === 'ad' || obj.sourceType === 'ad';
 }
 
 export function findAdInfo(value: unknown, depth = 0): AdInfo | null {
@@ -21,7 +28,7 @@ export function findAdInfo(value: unknown, depth = 0): AdInfo | null {
   const obj = value as Record<string, unknown>;
   if (looksLikeAd(obj)) {
     const ad = {
-      headline: str(obj.headline ?? obj.title),
+      headline: str(obj.headline ?? obj.ad_headline ?? obj.ad_title ?? obj.adTitle ?? obj.title),
       body: str(obj.body ?? obj.description),
       sourceUrl: str(obj.source_url ?? obj.sourceUrl ?? obj.url),
     };
@@ -50,8 +57,9 @@ export function adContextText(ad: AdInfo | null): string {
   if (ad.body) lines.push(`- Ad text: ${ad.body}`);
   if (ad.sourceUrl) lines.push(`- Ad link: ${ad.sourceUrl}`);
   lines.push(
-    '- Use this to understand which product they mean. Prices in the ad are the advertised prices; ' +
-      'mention the product from the ad and include it in the hand_over summary.',
+    "- This is Sunrose's own current ad, so its product and price are a confirmed current offer. " +
+      'Do not treat it as an unknown deal and do not ask for a screenshot. Name the deal and price in your reply ' +
+      'and include it in the hand_over summary.',
   );
   return lines.join('\n');
 }
