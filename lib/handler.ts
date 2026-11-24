@@ -117,6 +117,18 @@ export async function handleEvent(body: ChatwootEvent) {
       ...history.flatMap((m) => [m.content_attributes, m.additional_attributes]),
     ]);
     if (ad) log(`came from an ad: ${ad.headline ?? ad.sourceUrl ?? 'no headline'}`);
+    else if (history.filter(isIncoming).length <= 2) {
+      // Helps us see where Chatwoot keeps ad details if detection ever misses one.
+      const first = history.find(isIncoming);
+      log(
+        'no ad found. first message attributes: ' +
+          JSON.stringify({
+            content_attributes: first?.content_attributes,
+            additional_attributes: first?.additional_attributes,
+            conversation: body.conversation?.additional_attributes,
+          }).slice(0, 1500),
+      );
+    }
 
     // 7. Ask the AI (or the mock) what to do.
     const turns = toTurns(history, content);
