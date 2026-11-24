@@ -26,7 +26,7 @@ const durban: Branch = {
   name: 'Durban',
   knowledgeFile: 'durban.md',
   teamId: undefined, // no Durban team
-  assigneeId: 'admin',
+  assigneeId: 284724,
 };
 
 const johannesburg: Branch = {
@@ -34,7 +34,7 @@ const johannesburg: Branch = {
   name: 'Johannesburg',
   knowledgeFile: 'johannesburg.md',
   teamId: undefined, // FILL IN later: "Johannesburg Sales" team ID
-  assigneeId: undefined, // FILL IN later: Johannesburg agent ID
+  assigneeId: 286504, // FILL IN later: Johannesburg agent ID
 };
 
 const pretoria: Branch = {
@@ -49,6 +49,7 @@ export const BRANCHES_BY_INBOX: Record<number, Branch> = {
   // Bot Test inbox.
   // Change "durban" to johannesburg or pretoria to test those branches.
   157844: durban,
+  
 
   // Live WhatsApp inboxes. Remove the // at the start of a line on that branch's go-live day.
       157104: durban,       // Sunrose Online WhatsApp, 073 400 4991  (FILL IN inbox ID)
