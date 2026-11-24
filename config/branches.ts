@@ -52,6 +52,6 @@ export const BRANCHES_BY_INBOX: Record<number, Branch> = {
 
   // Live WhatsApp inboxes. Remove the // at the start of a line on that branch's go-live day.
       157104: durban,       // Sunrose Online WhatsApp, 073 400 4991  (FILL IN inbox ID)
-  // 333333: johannesburg, // Sunrose Johannesburg                   (FILL IN inbox ID)
+      158482: johannesburg, // Sunrose Johannesburg                   (FILL IN inbox ID)
   // 444444: pretoria,     // Sunrose Pretoria                       (FILL IN inbox ID)
 };
