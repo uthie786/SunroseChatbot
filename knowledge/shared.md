@@ -7,8 +7,17 @@ Keep it as short bullet points. Anything not written here, the assistant says "a
 ## About Sunrose
 
 - Sunrose Online is a South African commercial equipment supplier. Website: sunrose.co.za
-- Branches: Durban, Johannesburg and Pretoria.
+- Branches: Durban, Johannesburg and Pretoria (details under Branch locations).
 - Sunrose also offers: distributor applications, installer registration, a points & rewards programme, downloadable product catalogues, and B2B invoices / bulk orders. Details for these are on the website.
+
+## Branch locations
+
+All branches: Monday to Friday 8am to 5pm, Saturday 8am to 2:30pm.
+
+- Durban (KwaZulu-Natal): 280 Felix Dlamini Rd, Overport, Berea, Durban, 4067. WhatsApp 073 400 4991, calls 072 558 4250
+- Johannesburg (Gauteng): 19 Modulus Road, Unit 7 Modulus, Crownwood Road, Ormonde, Johannesburg South, 2091. WhatsApp and calls 081 891 1862
+- Pretoria (Gauteng): 96 Fascia Rd, Silvertondale, Pretoria, 0184. Calls and WhatsApp 060 144 6390
+- Online orders (any province): call or WhatsApp 067 090 4774, or order at sunrose.co.za. Nationwide delivery.
 
 ## Product ranges (and the label to use when handing over)
 
@@ -38,7 +47,7 @@ Branch prices may vary. Stock can change; a consultant confirms.
 - Slush machines: R18,999 to R28,500
 - Mobile coldroom: R36,999
 - Mobile kitchen solutions: R36,599 to R38,999
-- Shawarma Kitchen Combo (Shawarma in Motion Mobile Kitchen Package, Standard): R49,999. Mobile kitchen trailer with a 3-burner shawarma machine, double gas fryer, table-mount chip cutter and 9-slice toaster. Ts & Cs apply.
+- Shawarma Kitchen Combo (Shawarma in Motion Mobile Kitchen Package, Standard): R49,999, BLACK FRIDAY ONLY: valid on Friday 27 November 2026 only. Mobile kitchen trailer with a 3-burner shawarma machine, double gas fryer, table-mount chip cutter and 9-slice toaster. Ts & Cs apply.
 - Insulated panels special: R1,250 to R1,899
 - Business combos: Butcher Essentials R60,999; Ice Cream & Snack R34,499; Bakery R17,999; Butcher Starter from R17,899; Mobile Freezer & MQC Meat Bandsaw R51,999; Butchery Equipment from R79,999
 
