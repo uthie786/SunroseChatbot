@@ -69,7 +69,8 @@ async function ask(
               type: 'string',
               description:
                 'Short message telling the customer what happens next. If Sunrose is OPEN: a consultant will continue the chat. ' +
-                'If CLOSED: the team is closed and a consultant will reply at the next opening time (say when). Never say "now" or "shortly" when closed.',
+                'If CLOSED: the team is closed and a consultant will reply at the next opening time (say when). Never say "now" or "shortly" when closed. ' +
+                'Always end with the visit-or-call line for the relevant branch (address, phone, map link) from "Branch locations".',
             },
           },
           required: ['reason', 'category', 'summary', 'message_to_customer'],
