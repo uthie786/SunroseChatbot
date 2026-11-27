@@ -12,11 +12,12 @@ Keep it as short bullet points. Anything not written here, the assistant says "a
 
 ## Branch locations
 
-All branches: Monday to Friday 8am to 5pm, Saturday 8am to 2:30pm.
+Trading hours (all branches, including Springfield): Monday to Friday 8am to 5pm, Saturday 8am to 2:30pm.
 
-- Durban (KwaZulu-Natal): 280 Felix Dlamini Rd, Overport, Berea, Durban, 4067. WhatsApp 073 400 4991, calls 072 558 4250
-- Johannesburg (Gauteng): 19 Modulus Road, Unit 7 Modulus, Crownwood Road, Ormonde, Johannesburg South, 2091. WhatsApp and calls 081 891 1862
-- Pretoria (Gauteng): 96 Fascia Rd, Silvertondale, Pretoria, 0184. Calls and WhatsApp 060 144 6390
+- Durban, Overport (Sunrose Online, commercial equipment): 280 Felix Dlamini Rd, Overport, Durban, 4067. Calls 072 558 4250, WhatsApp 073 400 4991. Map: https://www.google.com/maps/search/?api=1&query=Sunrose+Online%2C+280+Felix+Dlamini+Rd%2C+Durban+4067
+- Durban, Springfield (Sunrose Wholesalers, hardware, building and decor): 9 Maplefield Place, Springfield, Durban, 4051. Calls 073 451 6568. Website sunrosewholesale.co.za. Map: https://www.google.com/maps/search/?api=1&query=Sunrose+Wholesalers%2C+9+Maplefield+Pl%2C+Durban+4051
+- Johannesburg (Gauteng): 19 Modulus Road, Unit 7 Modulus, Crownwood Road, Ormonde, Johannesburg South, 2091. Calls and WhatsApp 081 891 1862. Map: https://www.google.com/maps/search/?api=1&query=Sunrose+Online+Johannesburg%2C+19+Modulus+Road%2C+Johannesburg+2091
+- Pretoria (Gauteng): 96 Fascia Rd, Silvertondale, Pretoria (Tshwane), 0184. Calls and WhatsApp 060 144 6390. Map: https://www.google.com/maps/search/?api=1&query=Sunrose+Online+PTA%2C+96+Fascia+Rd%2C+Tshwane+0184
 - Online orders (any province): call or WhatsApp 067 090 4774, or order at sunrose.co.za. Nationwide delivery.
 
 ## Product ranges (and the label to use when handing over)
