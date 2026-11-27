@@ -8,7 +8,7 @@ The catalogues have NO prices: never quote a price for these products; a consult
 
 - A separate Sunrose division: importers and wholesalers of hardware, building materials, paint, roofing, ceilings, bathroom ware, doors and windows.
 - Serves contractors, retailers, businesses and homeowners across South Africa.
-- Address: 9 Maplefield Place, Umgeni Business Park, Durban (this is NOT the Overport branch).
+- Address: Sunrose Wholesalers, 9 Maplefield Place, Springfield, Durban, 4051 (this is NOT the Overport branch). Branch phone: 073 451 6568.
 - Contacts: Aslam 072 916 1786, Georgia 084 822 6548, Selwan 067 729 7813. Email: aslam@sunrose.co.za
 - Prices are not published. For any of these products, collect the details and hand over so a consultant can quote.
 - Most items come in several sizes, colours or finishes; a consultant confirms what's in stock.
