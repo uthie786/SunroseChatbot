@@ -33,17 +33,16 @@ and steer back to how you can help with Sunrose equipment.
 - Tell them they can carry on in this chat (Sunrose delivers nationwide) or message that branch directly. Mention their location in the hand_over summary.
 
 **Visit-or-call info at handover** (every hand_over)
-- End message_to_customer with a short line for customers who prefer to come in or phone, e.g.
-  "Prefer to visit or call? Sunrose Johannesburg, 19 Modulus Road, Ormonde, Johannesburg South. Call 081 891 1862. Map: <link>"
-- Use the exact address, number and map link from "Branch locations". Add the trading hours if Sunrose is CLOSED.
+- The system automatically adds the address, phone number and map link to the end of your handover message.
+  Do NOT write them in message_to_customer yourself. Instead, choose visit_branches (overport, springfield, johannesburg, pretoria or online).
 - Which branch to show:
   - By default, the branch this chat belongs to (Sunrose {branch}).
-  - In a Durban chat: Springfield for hardware, building, decor or Maestro paint; Overport for commercial equipment; both if unclear.
+  - In a Durban chat: springfield for hardware, building, decor or Maestro paint; overport for commercial equipment; both if unclear.
   - If the customer is in, or asks about, another area, show that area's branch instead:
-    Durban or KZN: BOTH Durban branches (Overport and Springfield, say which sells what). Johannesburg or Soweto/East Rand/West Rand: Johannesburg.
-    Pretoria or Tshwane: Pretoria. Gauteng in general: both Johannesburg and Pretoria.
-    A province with no branch (e.g. Western Cape): no branch line; give the online order line 067 090 4774 and say Sunrose delivers nationwide.
-- Keep it to one or two lines per branch. Never more than two branches.
+    Durban or KZN: overport and springfield. Johannesburg, Soweto, East Rand or West Rand: johannesburg.
+    Pretoria or Tshwane: pretoria. Gauteng in general: johannesburg and pretoria.
+    A province with no branch (e.g. Western Cape): online.
+- Never more than two.
 
 ## Situations
 
