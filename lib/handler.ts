@@ -1,6 +1,8 @@
 import { BRANCHES_BY_INBOX, type Branch } from '@/config/branches';
 import { adContextText, findAdInConversation } from './ad';
+import { findOrderInMessage, orderText } from './order';
 import { businessStatusText, getBusinessStatus } from '@/config/hours';
+import { defaultLocations, visitText } from '@/config/locations';
 import {
   addLabels,
   addPrivateNote,
@@ -93,8 +95,35 @@ export async function handleEvent(body: ChatwootEvent) {
 
     const hours = getBusinessStatus();
 
-    // 5. Voice notes, photos and files: the bot can't read them, so hand over.
-    const content = (body.content ?? '').trim();
+    // 5. Catalogue orders arrive with no text: turn the items into text the AI can read.
+    let content = (body.content ?? '').trim();
+    let catalogueOrder = '';
+    if (!content) {
+      const latestMsg = history.find((m) => m.id === body.id);
+      const order = findOrderInMessage([
+        body.content_attributes,
+        body.additional_attributes,
+        latestMsg?.content_attributes,
+        latestMsg?.additional_attributes,
+      ]);
+      if (order) {
+        catalogueOrder = orderText(order);
+        content = catalogueOrder;
+        log(`catalogue order with ${order.items.length} item(s)`);
+      } else {
+        // Shows us where Chatwoot keeps the details if a catalogue order is ever missed.
+        log(
+          'empty message, attributes: ' +
+            JSON.stringify({
+              content_attributes: body.content_attributes,
+              additional_attributes: body.additional_attributes,
+              message: latestMsg,
+            }).slice(0, 1500),
+        );
+      }
+    }
+
+    // Voice notes, photos and files: the bot can't read them, so hand over.
     if (!content) {
       await handOver(conversationId, branch, {
         type: 'hand_over',
@@ -132,6 +161,10 @@ export async function handleEvent(body: ChatwootEvent) {
 
     // 7. Ask the AI (or the mock) what to do.
     const turns = toTurns(history, content);
+    if (catalogueOrder) {
+      const last = turns.at(-1);
+      if (last && last.role === 'user' && !last.content.includes(catalogueOrder)) last.content += `\n${catalogueOrder}`;
+    }
     const rightNow = [businessStatusText(hours), adContextText(ad)].filter(Boolean).join('\n\n');
     const decision: Decision =
       process.env.BOT_MODE === 'live'
@@ -209,7 +242,12 @@ async function handOver(
   branch: Branch,
   d: Extract<Decision, { type: 'hand_over' }>,
 ) {
-  await sendReply(conversationId, d.messageToCustomer);
+  // Always end with where to visit or call (the AI picks the branch, otherwise this chat's branch).
+  const visit = visitText(
+    d.visitBranches?.length ? d.visitBranches : defaultLocations(branch.key, d.category),
+    getBusinessStatus().isOpen,
+  );
+  await sendReply(conversationId, `${d.messageToCustomer.trim()}\n\n${visit}`);
 
   await addLabels(conversationId, labelsFor(d)).catch((e) => console.error('[bot] labels failed:', e));
   if (d.reason === 'bulk_order') {
@@ -251,9 +289,10 @@ async function fallback(conversationId: number, branch: Branch) {
   const hours = getBusinessStatus();
   await sendReply(
     conversationId,
-    hours.isOpen
+    (hours.isOpen
       ? 'Thanks for your message! A Sunrose consultant will get back to you shortly.'
-      : `Thanks for your message! Our team is closed right now. A Sunrose consultant will reply ${hours.nextOpenText}.`,
+      : `Thanks for your message! Our team is closed right now. A Sunrose consultant will reply ${hours.nextOpenText}.`) +
+      `\n\n${visitText(defaultLocations(branch.key), hours.isOpen)}`,
   ).catch((e) => console.error('[bot] fallback reply failed:', e));
   await addPrivateNote(conversationId, 'Bot error: the assistant could not reply. Please take over this chat.');
   await addLabels(conversationId, ['bot-error']).catch(() => undefined);
