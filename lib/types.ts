@@ -1,3 +1,5 @@
+import type { LocationKey } from '@/config/locations';
+
 export type Turn = { role: 'user' | 'assistant'; content: string };
 
 export type HandOverReason =
@@ -41,5 +43,6 @@ export type Decision =
       use?: string;
       summary: string;
       messageToCustomer: string;
+      visitBranches?: LocationKey[]; // branches to show for visiting or calling
     }
   | { type: 'close_junk'; reason: string };
