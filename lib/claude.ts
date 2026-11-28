@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { CATEGORIES, type Category, type Decision, type HandOverReason, type Turn } from './types';
+import { LOCATION_KEYS, type LocationKey } from '@/config/locations';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'claude-haiku-5-5';
 
@@ -70,10 +71,18 @@ async function ask(
               description:
                 'Short message telling the customer what happens next. If Sunrose is OPEN: a consultant will continue the chat. ' +
                 'If CLOSED: the team is closed and a consultant will reply at the next opening time (say when). Never say "now" or "shortly" when closed. ' +
-                'Always end with the visit-or-call line for the relevant branch (address, phone, map link) from "Branch locations".',
+                'Do NOT include addresses, phone numbers or map links: the system adds the visit-or-call details for visit_branches automatically.',
+            },
+            visit_branches: {
+              type: 'array',
+              items: { type: 'string', enum: [...LOCATION_KEYS] },
+              maxItems: 2,
+              description:
+                'Which branch details to show the customer for visiting or calling (see "Which branch to show" in the instructions). ' +
+                'online = no branch nearby, show the online order line.',
             },
           },
-          required: ['reason', 'category', 'summary', 'message_to_customer'],
+          required: ['reason', 'category', 'summary', 'message_to_customer', 'visit_branches'],
         },
       },
       {
@@ -93,6 +102,10 @@ async function ask(
   const toolUse = res.content.find((block) => block.type === 'tool_use');
   if (toolUse && toolUse.type === 'tool_use') {
     const input = (toolUse.input ?? {}) as Record<string, string | undefined>;
+    const rawVisit = (toolUse.input as { visit_branches?: unknown } | undefined)?.visit_branches;
+    const visitBranches = Array.isArray(rawVisit)
+      ? (rawVisit.filter((k) => (LOCATION_KEYS as readonly string[]).includes(k)) as LocationKey[]).slice(0, 2)
+      : undefined;
     if (toolUse.name === 'hand_over') {
       return {
         type: 'hand_over',
@@ -107,6 +120,7 @@ async function ask(
         summary: input.summary ?? '',
         messageToCustomer:
           input.message_to_customer ?? 'Thanks! A Sunrose consultant will continue this chat shortly.',
+        visitBranches,
       };
     }
     if (toolUse.name === 'close_junk') {
