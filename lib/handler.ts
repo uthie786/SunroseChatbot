@@ -117,7 +117,8 @@ export async function handleEvent(body: ChatwootEvent) {
             JSON.stringify({
               content_attributes: body.content_attributes,
               additional_attributes: body.additional_attributes,
-              message: latestMsg,
+              message_content_attributes: latestMsg?.content_attributes,
+              message_additional_attributes: latestMsg?.additional_attributes,
             }).slice(0, 1500),
         );
       }
